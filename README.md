@@ -2,15 +2,20 @@
 
 Quickly setup and use multiple configurations for containerized services using docker compose.
 
-doq is a configuration helper tool and wrapper for the [docker-compose](https://docs.docker.com/compose) utility.
+**doq** is a configuration helper tool and wrapper for the [docker-compose](https://docs.docker.com/compose) utility.
+The goals are to:
+ * Simplify the management and use of multiple configuration files on a single project.
+ * Workaround current docker-compose shortcomings (such as mount point paths always being relative to the first config file directory, not the current working directory).
+ * Provide a way to retrieve, store and use configuration templates:
+ * Be simple and easy to use, on any project:
 
-The goal is to simplify the management and use of different configuration files, as well as workaround current docker-compose shortcomings
-(such as mount point paths always being relative to the first config file directory, not the current working directory).
+   ```
+   doq init --template=my-uber-docker-conf && doq start
+   ```
 
-In addition, it allows configurations to be stored and used as templates, for a quick and easy setup:
-```
-doq init --template=my-uber-conf && doq start
-```
+As a helper tool, doq does not provide any docker-compose.yml configuration files or templates.
+For full reference on docker-compose.yml file, see [compose-file](https://docs.docker.com/compose/compose-file/).
+
 
 ## Requirements
 
@@ -55,127 +60,67 @@ Installing globally: for ease of use, the rest of this doc assumes doq is instal
 
 ## Command Reference
 
-There are commands for the following steps:
+doq implements commands for managing configuration, templates and services, as well as interaction with containers:
 
- * Initialization
-   * [init](#init)
- * Handling of docker-compose configuration templates
-   * [template:import](#templateimport)
-   * [template:list](#templatelist)
-   * [template:save](#templatesave)
- * Setting up custom service definitions
-   * [service:add](#serviceadd)
-   * [service:list](#servicelist)
-   * [service:remove](#serviceremove)
- * starting, stopping, and interacting with containers
-   * [start](#start)
-   * [stop](#stop)
-   * [status](#status)
-   * [logs](#logs)
-   * [exec](#exec)
-   * [destroy](#destroy)
+#### Initialization:
 
+ * **init** `[-c,--config <name>] [--template=<name, path or url>]`
 
-* #### init
+   Setup a new environment configuration, optionally using a pre-existing template.
 
-    Setup a new environment configuration, optionally using a pre-existing template.
+   `configuration` name defaults to `'default'` if not specified.
+   If no configuration template is specified, it will check if a template with the same name as the configuration exists under `~/.docker-compose/`.
 
-    `environment` name defaults to `'default'` if not specified.
+#### Handling of docker-compose configuration templates:
 
-    If no configuration template is specified, it will check if a template with the same
-    name as the environment exists under `~/.docker-compose/`.
+ * **template:import** `<template-name> <path or url>`
 
-    If no template is found, a compose file will be created without any services.
+   Copies a docker-compose configuration file from a path or url, and saves it as a template under `~/.docker-compose/` using the provided name.
 
-    ```
-    doq init [<environment>] [--template=<name, path or url>]
-    ```
+ * **template:list**
 
-* #### template:import
+   List all configuration templates under the `~/.docker-compose/` folder, together with services and images defined in every configuration.
 
-    Copies a docker-compose configuration file from a path or url, and saves it as a template under `~/.docker-compose/` using the provided name.
+ * **template:save** `[-c,--config <name>] <template-name>`
 
-    ``` bash
-    doq template:import <template-name> <path or url>
-    ```
+   Copy the compose file from the local configuration and stores it as a template under `~/.docker-compose/`, using the provided name.
 
-* #### template:list
+#### Setting up custom service definitions:
 
-    List all configuration templates under the `~/.docker-compose/` folder, together with services and images defined in every configuration.
-
-    ```sh
-    doq template:list
-    ```
-
-* #### template:save
-
-    Copy the compose file from the local configuration and stores it as a template under `~/.docker-compose/`, using the provided name.
-
-    ``` bash
-    doq template:save [-c,--config <name>] <template-name>
-    ```
-
-* #### service:add
+ * **service:add** `[-c,--config <name>] <service-name> [--image] [--ports] [--command] [--mounts] [--links] [--envs]`
 
    Adds a new service, or updates a existing one, to the compose configuration of the specified environment.
 
-   ``` bash
-   doq service:add [-c,--config <name>] <service-name> [--image] [--ports] [--command] [--mounts] [--links] [--envs]
-   ```
-
- * #### service:list
+ * **service:list** `[-c,--config <name>]`
 
    Lists all the defined services in the compose configuration file of the specified environment.
 
-   ``` bash
-   doq service:list [-c,--config <name>]
-   ```
+ * **service:remove** `[-c,--config <name>]  <service-name>`
 
-* #### service:remove
+  Removes a service from the compose configuration of the specified environment.
 
-   Removes a service from the compose configuration of the specified environment.
 
-   ``` bash
-   doq service:remove [-c,--config <name>] <service-name>
-   ```
+#### Starting, stopping, and interacting with containers:
 
- * #### start
+ * **start** `[-c,--config <name>]`
 
-   Starts all the docker service containers of the existing configuration environment, creating them if needed. If no config is specified, *'default'* will be used).
+    Starts all the docker service containers of the existing configuration environment, creating them if needed. If no config is specified, *'default'* will be used).
 
-   ``` bash
-   doq start [-c,--config <name>]
-   ```
+ * **stop** `[-c,--config <name>]`
 
- * #### stop
+    Stops all the specified environment services but does not destroy them, can be later restarted using the `start` command.
 
-   Stops all the specified environment services but does not destroy them, can be later restarted using the `start` command.
+ * **status** `[-c,--config <name>]`
 
-   ``` bash
-   doq stop [-c,--config <name>]
-   ```
+    Shows the status of the running service containers for the config environment.
 
- * #### status
+ * **logs** `[-c,--config <name>] [<service-name>]`
 
-   Shows the status of the running service containers for the config environment.
+ * **exec** `[-c,--config <name>] [<service-name>] <command>`
 
-   ``` bash
-   doq status  [-c,--config <name>]
-   ```
+ * **destroy** `[-c,--config <name>]`
 
- * #### destroy
-
-   Stops and removes all containers, networks, volumes, and images for the chosen configuration environment (or *'default'* if none is specified).
-
-   ``` bash
-   doq destroy [-c,--config <name>]
-   ```
-
-## Templates
-
-As a helper tool, doq does not provide any docker-compose configuration files/templates.
-Pre-existing templates for a full PHP web stack can be found at ...
-For full reference on docker-compose.yml file, see [compose-file](https://docs.docker.com/compose/compose-file/)
+    Stops and removes all containers, networks, volumes, and images for the chosen configuration environment (or *'default'* if none is specified).
 
 
 ### Building doq
