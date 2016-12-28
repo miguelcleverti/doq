@@ -1,0 +1,11 @@
+#!/usr/bin/env php
+<?php
+/**
+ * doq application entry-point
+ */
+
+// require composer vendor autoloads
+require __DIR__.'/../vendor/autoload.php';
+
+$doq = new doq\Application();
+$doq->run();
