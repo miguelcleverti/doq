@@ -15,7 +15,6 @@ class DockerCompose
     protected $lastResult;
     protected $lastCommandOutput;
 
-
     public function useConfiguration($configName)
     {
         $this->configName = $configName;

@@ -103,7 +103,6 @@ class StartCommandTest extends PHPUnit_Framework_TestCase
             '--config' => 'nonexistant'
         ]);
 
-        $this->assertRegexp('/Error/', $tester->getDisplay() );
+        $this->assertRegexp('/Error/', $tester->getDisplay());
     }
-
 }

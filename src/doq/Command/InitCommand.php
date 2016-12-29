@@ -38,14 +38,22 @@ class InitCommand extends Command
 
         try {
             $configName = $input->getArgument('config');
-            DockerCompose::testConfigFileDoesNotExist($configName);
-
             $template = $input->getOption('template');
-            var_dump( $template );
 
-            // detect it $template is name, local path or url
+            $filePath = getcwd() . DIRECTORY_SEPARATOR . $template;
+            $urlPattern = '@^(https?|ftp)://[^\s/$.?#].[^\s]*$@iS';
 
-            // do stuff
+            // if (is_file($filePath)) {
+            //     // local file
+            //     echo "template is a local file and it exits";
+            // } elseif (preg_match($urlPattern, $template, $match)) {
+            //     echo "template is an url";
+            // } elseif ( 1 ) {
+            //     // try to get extension and match if it is a (non-existant) file
+            // } else {
+            //     // not file or url, validate as a possible template name
+            // }
+
 
             $output->writeln('<info>Done.</info>');
         } catch (ConfigExistsException $e) {
