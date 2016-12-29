@@ -97,7 +97,7 @@ class DockerCompose
         // escape and execute shell command
         $command = escapeshellcmd("docker-compose $options $command $args");
 
-        //exec($command, $out, $result);
+        exec($command, $out, $result);
 
         $this->lastCommandOutput = implode(PHP_EOL, $out);
         $this->lastResult = $result;
