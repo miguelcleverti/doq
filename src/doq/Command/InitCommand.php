@@ -41,11 +41,15 @@ class InitCommand extends Command
             DockerCompose::testConfigFileDoesNotExist($configName);
 
             $template = $input->getOption('template');
-            var_dump( $template );
 
-            // detect it $template is name, local path or url
-
-            // do stuff
+            $fileContents = @file_get_contents($template);
+            if ($fileContents) {
+                // local path or url
+                // do some stuff
+            } else {
+                // name
+                // do some other stuff
+            }
 
             $output->writeln('<info>Done.</info>');
         } catch (ConfigExistsException $e) {
