@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use doq\DockerCompose;
 use doq\Exception\ConfigNotFoundException;
 
-class StartCommand extends Command
+class StartCommand extends BaseCommand
 {
     protected function configure()
     {
@@ -29,21 +29,21 @@ class StartCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->write('<info>Starting docker service containers...</info> ');
+        $dc = $this->getDockerCompose();
 
         try {
-            DockerCompose::executeCommand(
-                $input->getOption('config'),
-                'up -d'
-            );
+            $dc->useConfiguration($input->getOption('config'));
+            try {
+                $dc->executeCommand('up -d');
 
-            $output->writeln(DockerCompose::lastOutput(), OutputInterface::VERBOSITY_VERBOSE);
-
-            $output->writeln('<info>Done.</info>');
+                $output->writeln( PHP_EOL . $dc->lastOutput(), OutputInterface::VERBOSITY_VERBOSE);
+                $output->writeln('<info>Done.</info>');
+            } catch (\Exception $e) {
+                $output->writeln(PHP_EOL . '<error>Error:</error> Failed to bring up the containers using docker-compose:');
+                $output->writeln($dc->lastOutput());
+            }
         } catch (ConfigNotFoundException $e) {
             $output->writeln(PHP_EOL . '<error>Error:</error> ' . $e->getMessage() );
-        } catch (\Exception $e) {
-            $output->writeln(PHP_EOL . '<error>Error:</error> Failed to bring up the containers using docker-compose:');
-            $output->writeln(DockerCompose::lastOutput());
         }
     }
 }
